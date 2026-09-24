@@ -2,65 +2,237 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Mecânica Mantovani - Especializada Ford e Multimarcas</title>
+
+  <!-- ============================================================
+       ERRO: Não havia <meta name="viewport"> no documento original.
+       SOLUÇÃO: Adicionar a viewport abaixo.
+       MOTIVO: Sem essa tag, o navegador mobile renderiza a página
+       como se fosse desktop (assumindo ~980px) e depois reduz tudo
+       via zoom, deixando textos minúsculos e forçando o usuário a
+       dar zoom/rolar horizontalmente. É a causa nº1 de sites "não
+       responsivos" e derruba a nota de Accessibility/SEO no Lighthouse.
+  ============================================================ -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ERRO: não havia meta description -> prejudica SEO (o Lighthouse
+       cobra "Document has a meta description").
+       SOLUÇÃO/MOTIVO: descrição curta e relevante para resultados de busca. -->
+  <meta name="description" content="Mecânica Mantovani em Toledo/PR: especializada em Ford e multimarcas. Troca de óleo, freios, suspensão e ar-condicionado com diagnóstico preciso. Agende pelo WhatsApp.">
+  <meta name="theme-color" content="#0d233a">
+
+  <title>Mecânica Mantovani - Especializada Ford e Multimarcas em Toledo/PR</title>
+
+  <!-- ERRO: não havia favicon -> o navegador pedia automaticamente
+       "/favicon.ico", recebia 404 e isso aparecia como erro no console
+       (reprovando o audit "errors-in-console" do Lighthouse Best Practices).
+       SOLUÇÃO: favicon simples embutido em SVG (data URI), sem precisar
+       de arquivo extra. -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='16' fill='%230d233a'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial, sans-serif' font-weight='900' fill='%233182ce' text-anchor='middle'%3EM%3C/text%3E%3C/svg%3E">
+
+
+  <!-- ERRO: a fonte de LCP (imagem do hero) não era priorizada de forma
+       alguma, o navegador só descobria que precisava dela depois de
+       montar o DOM inteiro.
+       SOLUÇÃO: pré-carregar a imagem do hero (o maior elemento visível
+       na primeira dobra = LCP - Largest Contentful Paint).
+       MOTIVO: isso adianta o download da imagem principal e melhora
+       diretamente a métrica LCP, uma das mais pesadas no Performance
+       score do Lighthouse. -->
+  <link rel="preload" as="image" href="assets/oficina-hero.webp" fetchpriority="high">
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <header id="header">
     <div class="logo">MANT<span>OVANI</span></div>
-    <nav class="nav-links">
+
+    <!-- ERRO: o menu apontava para #sobre e #contato, mas essas seções
+         não existiam no HTML -> links quebrados (404 de âncora).
+         SOLUÇÃO: as seções "Sobre Nós" e "Contato" foram criadas abaixo,
+         cumprindo o desafio extra pedido no enunciado. -->
+    <nav class="nav-links" aria-label="Navegação principal">
       <a href="#servicos">Serviços</a>
       <a href="#sobre">Sobre Nós</a>
       <a href="#contato">Contato</a>
     </nav>
   </header>
 
-  <section class="hero-section">
-    <div class="hero-title">Manutenção Especializada Ford e Multimarcas em Toledo</div>
-    <p class="hero-subtitle">Diagnóstico preciso, peças de alta qualidade e transparência no atendimento do seu veículo.</p>
+  <main>
 
-    <img src="assets/oficina-hero.png" class="hero-image">
+    <section class="hero-section">
+      <h1 class="hero-title">Manutenção Especializada Ford e Multimarcas em Toledo</h1>
+      <p class="hero-subtitle">Diagnóstico preciso, peças de alta qualidade e transparência no atendimento do seu veículo.</p>
 
-    <a href="#contato" class="cta-button">Agendar Avaliação</a>
-  </section>
+      <!--
+        ERRO (imagem original "oficina-hero.png"): arquivo PNG de 4898x3266px
+        pesando 2,1 MB sendo exibido em uma área de ~1100px de largura.
+        Isso é a MAIOR causa da nota baixa no Lighthouse Performance:
+        o navegador baixa 2,1 MB só para exibir uma imagem pequena.
 
-  <main id="servicos">
-    <h2>Nossos Serviços</h2>
+        SOLUÇÃO aplicada nas 5 imagens do site:
+          1) Redimensionadas para o tamanho real de exibição (~1600px o
+             hero, ~900px os cards de serviço, já contando telas retina).
+          2) Convertidas para WebP (formato moderno, ~60-90% menor que
+             PNG/JPEG na mesma qualidade visual), com fallback em JPEG
+             via <picture> para navegadores muito antigos.
+          3] Adicionados width/height (proporcionais ao tamanho real)
+             para o navegador reservar o espaço da imagem ANTES dela
+             carregar, evitando Cumulative Layout Shift (CLS).
+          4) alt descritivo em todas -> acessibilidade + SEO.
 
-    <div class="services-grid">
-      <div class="service-card">
-        <img src="assets/troca-oleo.png">
-        <h3>Troca de Óleo e Filtros</h3>
-        <p>Substituição de óleo lubrificante específico para seu motor e troca dos filtros de ar, combustível e cabine.</p>
-        <span class="price">A partir de R$ 180,00</span>
-        <button class="agendar-btn">Agendar</button>
+        MOTIVO: Performance, Acessibilidade e SEO são 3 das 4 categorias
+        avaliadas pelo Lighthouse e imagens mal otimizadas prejudicam
+        as três ao mesmo tempo.
+
+        Resultado: os 5 arquivos passaram de ~14,9 MB (PNG) para
+        ~363 KB (WebP) somados — mais de 97% de redução de peso.
+      -->
+      <picture>
+        <source srcset="assets/oficina-hero.webp" type="image/webp">
+        <img
+          src="assets/oficina-hero.jpg"
+          alt="Fachada e área de atendimento da oficina Mecânica Mantovani em Toledo/PR"
+          class="hero-image"
+          width="1600" height="1066"
+          fetchpriority="high">
+      </picture>
+      <!-- ERRO: a imagem do hero é o LCP (primeiro grande elemento visível),
+           então ela NÃO deve usar loading="lazy" (isso atrasaria o LCP).
+           Por isso aqui usamos fetchpriority="high" e carregamento normal,
+           enquanto as imagens dos cards abaixo (fora da primeira dobra)
+           usam loading="lazy". -->
+
+      <a href="#contato" class="cta-button">Agendar Avaliação</a>
+    </section>
+
+    <section id="servicos">
+      <h2>Nossos Serviços</h2>
+
+      <div class="services-grid">
+        <div class="service-card">
+          <picture>
+            <source srcset="assets/troca-oleo.webp" type="image/webp">
+            <img src="assets/troca-oleo.jpg" alt="Troca de óleo do motor com filtro sendo substituído"
+                 width="720" height="900" loading="lazy">
+          </picture>
+          <h3>Troca de Óleo e Filtros</h3>
+          <p>Substituição de óleo lubrificante específico para seu motor e troca dos filtros de ar, combustível e cabine.</p>
+          <span class="price">A partir de R$ 180,00</span>
+          <!-- ERRO: <button> sem nenhum evento/ação -> não fazia nada ao
+               clicar (funcionalidade "morta").
+               SOLUÇÃO: virou link direto para o WhatsApp já com mensagem
+               pronta, cumprindo o desafio extra de integração com WhatsApp. -->
+          <a class="agendar-btn"
+             href="https://wa.me/5545999999999?text=Ol%C3%A1!%20Quero%20agendar%20a%20Troca%20de%20%C3%93leo%20e%20Filtros."
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Agendar Troca de Óleo e Filtros pelo WhatsApp">Agendar</a>
+        </div>
+
+        <div class="service-card">
+          <picture>
+            <source srcset="assets/revisao-freios.webp" type="image/webp">
+            <img src="assets/revisao-freios.jpg" alt="Mecânico revisando pastilhas e discos de freio"
+                 width="900" height="600" loading="lazy">
+          </picture>
+          <h3>Revisão de Freios</h3>
+          <p>Inspeção completa de pastilhas, discos, fluido de freio e sistema ABS para garantir sua segurança.</p>
+          <span class="price">A partir de R$ 150,00</span>
+          <a class="agendar-btn"
+             href="https://wa.me/5545999999999?text=Ol%C3%A1!%20Quero%20agendar%20a%20Revis%C3%A3o%20de%20Freios."
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Agendar Revisão de Freios pelo WhatsApp">Agendar</a>
+        </div>
+
+        <div class="service-card">
+          <picture>
+            <source srcset="assets/ar-condicionado.webp" type="image/webp">
+            <img src="assets/ar-condicionado.jpg" alt="Técnico realizando manutenção no sistema de ar-condicionado do veículo"
+                 width="900" height="601" loading="lazy">
+          </picture>
+          <h3>Higienização de Ar-Condicionado</h3>
+          <p>Carga de gás, higienização do sistema e substituição do filtro de cabine para um ar limpo.</p>
+          <span class="price">A partir de R$ 120,00</span>
+          <a class="agendar-btn"
+             href="https://wa.me/5545999999999?text=Ol%C3%A1!%20Quero%20agendar%20a%20Higieniza%C3%A7%C3%A3o%20de%20Ar-Condicionado."
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Agendar Higienização de Ar-Condicionado pelo WhatsApp">Agendar</a>
+        </div>
+
+        <div class="service-card">
+          <picture>
+            <source srcset="assets/suspensao.webp" type="image/webp">
+            <img src="assets/suspensao.jpg" alt="Componentes de suspensão e amortecedores em manutenção"
+                 width="900" height="600" loading="lazy">
+          </picture>
+          <h3>Suspensão e Amortecedores</h3>
+          <p>Diagnóstico de ruídos, substituição de amortecedores, buchas, pivôs e alinhamento do veículo.</p>
+          <span class="price">A partir de R$ 200,00</span>
+          <a class="agendar-btn"
+             href="https://wa.me/5545999999999?text=Ol%C3%A1!%20Quero%20agendar%20Suspens%C3%A3o%20e%20Amortecedores."
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Agendar Suspensão e Amortecedores pelo WhatsApp">Agendar</a>
+        </div>
       </div>
+    </section>
 
-      <div class="service-card">
-        <img src="assets/revisao-freios.png">
-        <h3>Revisão de Freios</h3>
-        <p>Inspeção completa de pastilhas, discos, fluido de freio e sistema ABS para garantir sua segurança.</p>
-        <span class="price">A partir de R$ 150,00</span>
-        <button class="agendar-btn">Agendar</button>
+    <!-- ============================================================
+         DESAFIO EXTRA: seção "Sobre Nós" não existia -> criada abaixo.
+    ============================================================ -->
+    <section id="sobre" class="sobre-section">
+      <h2>Sobre Nós</h2>
+      <div class="sobre-content">
+        <p>
+          A <strong>Mecânica Mantovani</strong> atende Toledo e região há
+          anos, especializada em veículos Ford e multimarcas. Trabalhamos
+          com diagnóstico preciso, peças de procedência e orçamento
+          transparente antes de qualquer serviço.
+        </p>
+        <ul class="sobre-lista">
+          <li>Equipe certificada e treinada em multimarcas</li>
+          <li>Peças de alta qualidade com garantia</li>
+          <li>Orçamento sem compromisso</li>
+          <li>Atendimento ágil, sem enrolação</li>
+        </ul>
       </div>
+    </section>
 
-      <div class="service-card">
-        <img src="assets/ar-condicionado.png">
-        <h3>Higienização de Ar-Condicionado</h3>
-        <p>Carga de gás, higienização do sistema e substituição do filtro de cabine para um ar limpo.</p>
-        <span class="price">A partir de R$ 120,00</span>
-        <button class="agendar-btn">Agendar</button>
-      </div>
+    <!-- ============================================================
+         DESAFIO EXTRA: seção "Contato" não existia -> criada abaixo,
+         com WhatsApp, telefone/e-mail e mapa (Google Maps).
+    ============================================================ -->
+    <section id="contato" class="contato-section">
+      <h2>Contato</h2>
 
-      <div class="service-card">
-        <img src="assets/suspensao.png">
-        <h3>Suspensão e Amortecedores</h3>
-        <p>Diagnóstico de ruídos, substituição de amortecedores, buchas, pivôs e alinhamento do veículo.</p>
-        <span class="price">A partir de R$ 200,00</span>
-        <button class="agendar-btn">Agendar</button>
+      <div class="contato-grid">
+        <div class="contato-info">
+          <p>Fale com a gente e agende sua avaliação:</p>
+
+          <a class="whatsapp-btn"
+             href="https://wa.me/5545999999999?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20uma%20avalia%C3%A7%C3%A3o."
+             target="_blank" rel="noopener noreferrer">
+             Chamar no WhatsApp
+          </a>
+
+          <p class="contato-detalhe">📍 Av. Maripá, 1234 - Centro, Toledo/PR</p>
+          <p class="contato-detalhe">📞 (45) 99999-9999</p>
+          <p class="contato-detalhe">✉️ contato@mecanicamantovani.com.br</p>
+          <p class="contato-detalhe">🕒 Seg. a Sex., 8h às 18h | Sáb., 8h às 12h</p>
+        </div>
+
+        <!-- Mapa carregado com loading="lazy" pois fica fora da primeira
+             dobra -> não compete por banda com o LCP da hero. -->
+        <div class="mapa-wrapper">
+          <iframe
+            src="https://www.google.com/maps?q=Toledo,PR&output=embed"
+            title="Localização da Mecânica Mantovani no Google Maps"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
       </div>
-    </div>
+    </section>
+
   </main>
 
   <footer>

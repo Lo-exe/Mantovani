@@ -1,3 +1,8 @@
+/* ==================================================================
+   ARQUIVO REESCRITO — cada bloco abaixo documenta o ERRO original,
+   a SOLUÇÃO aplicada e o MOTIVO (no mesmo padrão pedido no enunciado).
+   ================================================================== */
+
 * {
   margin: 0;
   padding: 0;
@@ -7,23 +12,44 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #1a202c;
-  width: 1280px;
+
+  /* ERRO original: width: 1280px;
+     Com uma largura FIXA em pixels, em qualquer tela menor que 1280px
+     (ou seja, praticamente todo celular e boa parte dos notebooks) o
+     conteúdo ultrapassava a largura da viewport, criando barra de
+     rolagem horizontal e forçando o usuário a arrastar a página para
+     os lados. Esse único erro já derrubava Performance e Accessibility
+     no Lighthouse (layout não usável em mobile).
+     SOLUÇÃO: max-width no lugar de width fixo, permitindo que o body
+     encolha em telas menores em vez de "vazar" para fora da tela. */
+  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   background-color: #f7fafc;
+  overflow-x: hidden; /* rede de segurança contra estouros horizontais */
 }
 
 #header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 50px;
+
+  /* ERRO: padding: 20px 50px; fixo em telas pequenas empurrava a logo
+     e o menu para fora da área visível, além de height:80px fixo não
+     acomodar o menu quando ele quebra linha no mobile.
+     SOLUÇÃO: padding fluido com clamp() e flex-wrap para o header se
+     adaptar sem quebrar o layout, altura automática (min-height). */
+  padding: 16px clamp(16px, 5vw, 50px);
+  min-height: 80px;
+  flex-wrap: wrap;
+  gap: 10px;
+
   background-color: #0d233a;
   color: #ffffff;
-  height: 80px;
 }
 
 .logo {
-  font-size: 28px;
+  font-size: clamp(20px, 4vw, 28px); /* ERRO: 28px fixo estourava em telas muito estreitas ao lado do menu; SOLUÇÃO: fonte fluida com clamp() */
   font-weight: 900;
   letter-spacing: 2px;
   font-family: 'Impact', 'Arial Black', sans-serif;
@@ -33,77 +59,138 @@ body {
   color: #3182ce;
 }
 
+.nav-links {
+  display: flex;
+  flex-wrap: wrap; /* ERRO: sem wrap, os 3 links podiam ser espremidos e sobrepor a logo em telas pequenas */
+  gap: 4px 15px;
+}
+
 .nav-links a {
   color: #ffffff;
   text-decoration: none;
-  margin-left: 15px;
   font-size: 14px;
+  padding: 4px 2px; /* área de toque um pouco maior para mobile */
+}
+
+.nav-links a:hover,
+.nav-links a:focus-visible {
+  text-decoration: underline;
 }
 
 .hero-section {
-  padding: 60px 50px;
+  /* ERRO: padding: 60px 50px; fixo consumia metade da tela em celulares
+     pequenos. SOLUÇÃO: clamp() para o padding respirar proporcionalmente
+     ao tamanho da tela. */
+  padding: clamp(30px, 8vw, 60px) clamp(16px, 5vw, 50px);
   text-align: center;
   background-color: #edf2f7;
 }
 
 .hero-title {
-  font-size: 34px;
+  /* ERRO: font-size: 34px fixo ficava desproporcional/quebrava mal em
+     telas pequenas. SOLUÇÃO: clamp(mínimo, ideal, máximo) — tipografia
+     fluida que escala com a largura da tela sem media query extra. */
+  font-size: clamp(24px, 5vw, 34px);
   font-weight: 800;
   margin-bottom: 15px;
   color: #0d233a;
+  line-height: 1.25;
 }
 
 .hero-subtitle {
-  font-size: 18px;
+  font-size: clamp(15px, 2.2vw, 18px);
   color: #4a5568;
   margin-bottom: 30px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .hero-image {
-  width: 1100px;
+  /* ERRO original: width: 1100px; (largura fixa em pixels)
+     Em qualquer viewport menor que 1100px a imagem ultrapassava a tela,
+     era a principal responsável pela barra de rolagem horizontal em
+     celulares E, por ser um arquivo PNG de vários MB no tamanho
+     original, também era a principal responsável pela nota baixa de
+     Performance (ver comentário na imagem, no index.html).
+     SOLUÇÃO: max-width: 100% + height: auto -> a imagem nunca ultrapassa
+     o contêiner pai e mantém a proporção original (evita distorção). */
+  max-width: 100%;
+  width: 100%;
   height: auto;
   margin-bottom: 25px;
   border-radius: 8px;
+  display: block;
 }
 
 .cta-button {
   display: inline-block;
-  padding: 12px 30px;
-  background-color: #3182ce;
+  padding: 14px 30px; /* ligeiramente maior que o original para melhorar a área de toque (acessibilidade em telas de toque, alvo mínimo ~44px) */
+  /* ERRO: background-color: #3182ce; com texto branco tinha contraste de
+     apenas 4.02:1 (Lighthouse Accessibility exige 4.5:1 para texto normal).
+     SOLUÇÃO: tom um pouco mais escuro (#2b6cb0), contraste 5.42:1. */
+  background-color: #2b6cb0;
   color: white;
   text-decoration: none;
   border-radius: 5px;
   font-weight: bold;
 }
 
-#servicos {
-  padding: 50px;
+.cta-button:hover,
+.cta-button:focus-visible {
+  background-color: #1a4971;
 }
 
-#servicos h2 {
+#servicos,
+.sobre-section,
+.contato-section {
+  /* ERRO: padding: 50px; fixo. SOLUÇÃO: padding fluido igual ao restante do site. */
+  padding: clamp(30px, 6vw, 50px) clamp(16px, 5vw, 50px);
+}
+
+#servicos h2,
+.sobre-section h2,
+.contato-section h2 {
   margin-bottom: 30px;
   text-align: center;
   color: #0d233a;
+  font-size: clamp(22px, 4vw, 28px);
 }
 
 .services-grid {
-  display: flex;
+  /* ERRO original: display: flex; com .service-card { width: 280px }
+     fixo. Com 4 cards de 280px + gaps, a soma ultrapassava a largura
+     de qualquer tela de celular (e da maioria dos tablets), e como
+     flex não quebra linha por padrão, os cards eram espremidos ou
+     vazavam da tela.
+     SOLUÇÃO: CSS Grid com auto-fit/minmax(), que calcula sozinho
+     quantas colunas cabem na largura disponível e quebra linha
+     automaticamente — sem precisar de media query para isso. */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 25px;
-  justify-content: center;
 }
 
 .service-card {
   background: white;
-  width: 280px;
+  /* ERRO: width: 280px fixo (ver explicação acima em .services-grid).
+     SOLUÇÃO: width: 100% -> o card ocupa a coluna que o grid calculou. */
+  width: 100%;
   padding: 20px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
 }
 
 .service-card img {
-  width: 240px;
-  height: 160px;
+  /* ERRO: width: 240px / height: 160px fixos em px não eram
+     responsivos dentro do card. SOLUÇÃO: 100% de largura, altura
+     automática por aspect-ratio, mantendo o recorte com object-fit. */
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
   object-fit: cover;
   margin-bottom: 15px;
   border-radius: 4px;
@@ -120,6 +207,7 @@ body {
   font-size: 13px;
   margin-bottom: 15px;
   line-height: 1.4;
+  flex-grow: 1; /* mantém os botões "Agendar" alinhados mesmo com textos de tamanhos diferentes */
 }
 
 .price {
@@ -131,13 +219,132 @@ body {
 }
 
 .agendar-btn {
-  padding: 4px 8px;
-  font-size: 10px;
+  /* ERRO: era um <button> sem nenhuma ação (ver comentário no HTML) e
+     com padding/font-size minúsculos (10px), abaixo do alvo de toque
+     mínimo recomendado (~44x44px), prejudicando Accessibility no
+     Lighthouse ("Tap targets are not sized appropriately").
+     SOLUÇÃO: agora é um link estilizado como botão (com href real para
+     o WhatsApp) e com área de toque maior. */
+  display: inline-block;
+  text-align: center;
+  padding: 10px 16px;
+  font-size: 13px;
   background-color: #2b6cb0;
   color: white;
+  text-decoration: none;
   border: none;
-  border-radius: 3px;
+  border-radius: 4px;
   cursor: pointer;
+  font-weight: 600;
+}
+
+.agendar-btn:hover,
+.agendar-btn:focus-visible {
+  background-color: #1a4971;
+}
+
+/* ==================================================================
+   Seções novas (desafio extra): Sobre Nós e Contato
+   ================================================================== */
+
+.sobre-section {
+  background-color: #edf2f7;
+}
+
+.sobre-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.sobre-content p {
+  color: #4a5568;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.sobre-lista {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  text-align: left;
+}
+
+.sobre-lista li {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  color: #1a202c;
+  font-size: 14px;
+}
+
+.sobre-lista li::before {
+  content: "✔ ";
+  color: #3182ce;
+  font-weight: bold;
+}
+
+.contato-grid {
+  display: grid;
+  /* Duas colunas em telas largas, empilha automaticamente em telas
+     estreitas (mesma técnica de grid responsivo usada em .services-grid) */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+.contato-info p {
+  margin-bottom: 12px;
+  color: #4a5568;
+}
+
+.contato-detalhe {
+  font-size: 15px;
+}
+
+.whatsapp-btn {
+  display: inline-block;
+  /* ERRO: background-color: #25d366 (verde claro "oficial" do WhatsApp)
+     com texto branco tem contraste de apenas 1.98:1 — reprovado no
+     Lighthouse Accessibility (mínimo 4.5:1).
+     SOLUÇÃO: usar o verde-escuro/petróleo da identidade do WhatsApp
+     (#075e54), contraste 7.67:1, continua reconhecível como "WhatsApp"
+     mas agora é acessível. */
+  background-color: #075e54;
+  color: white;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  margin-bottom: 20px;
+}
+
+.whatsapp-btn:hover,
+.whatsapp-btn:focus-visible {
+  background-color: #054c44;
+}
+
+.mapa-wrapper {
+  /* ERRO evitado: um <iframe> sem contêiner responsivo normalmente tem
+     largura/altura fixas em px e estoura a tela em mobile.
+     SOLUÇÃO: contêiner com aspect-ratio fixo e o iframe ocupando 100%
+     dele, deixando o mapa responsivo em qualquer tamanho de tela. */
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.mapa-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 footer {
@@ -146,4 +353,25 @@ footer {
   text-align: center;
   padding: 20px;
   margin-top: 40px;
+}
+
+/* ==================================================================
+   ERRO: não existia NENHUMA media query no arquivo original — o site
+   dependia 100% de larguras fixas, por isso nem cabia falar em "pontos
+   de quebra". As correções acima (clamp, grid auto-fit, max-width:100%)
+   já resolvem a maior parte da responsividade sem precisar de muitas
+   media queries. As poucas abaixo só fazem ajustes finos em telas bem
+   estreitas, onde 2 colunas de contato ficam melhor empilhadas de vez
+   em quando ou onde o menu precisa ficar centralizado.
+   ================================================================== */
+@media (max-width: 480px) {
+  #header {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .nav-links {
+    justify-content: center;
+    width: 100%;
+  }
 }
