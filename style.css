@@ -347,6 +347,44 @@ body {
   border: 0;
 }
 
+.mapa-facade {
+  /* Botão que ocupa o lugar do mapa até o clique (ver comentário
+     ERRO/SOLUÇÃO/MOTIVO no index.html, acima do mapa-wrapper). */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #edf2f7, #e2e8f0);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 20px;
+  text-align: center;
+}
+
+.mapa-facade:hover,
+.mapa-facade:focus-visible {
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+}
+
+.mapa-facade-icon {
+  font-size: 32px;
+}
+
+.mapa-facade-texto {
+  font-weight: bold;
+  color: #0d233a;
+  font-size: 16px;
+}
+
+.mapa-facade-sub {
+  color: #4a5568;
+  font-size: 13px;
+}
+
 footer {
   background-color: #0d233a;
   color: white;

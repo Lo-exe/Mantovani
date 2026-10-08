@@ -220,20 +220,58 @@
           <p class="contato-detalhe">🕒 Seg. a Sex., 8h às 18h | Sáb., 8h às 12h</p>
         </div>
 
-        <!-- Mapa carregado com loading="lazy" pois fica fora da primeira
-             dobra -> não compete por banda com o LCP da hero. -->
-        <div class="mapa-wrapper">
-          <iframe
-            src="https://www.google.com/maps?q=Toledo,PR&output=embed"
-            title="Localização da Mecânica Mantovani no Google Maps"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
-          </iframe>
+        <!--
+          ERRO: a primeira versão carregava o <iframe> do Google Maps
+          direto no carregamento da página. Isso derrubou a nota de
+          Best Practices de 100 para 58 no Lighthouse, porque o iframe
+          do Maps, só de carregar, já seta dezenas de cookies de
+          terceiros ("Uses third-party cookies — 27 cookies found") e
+          usa APIs do navegador marcadas como depreciadas internamente
+          no script do Google ("Uses deprecated APIs"), gerando também
+          avisos no painel Issues do DevTools.
+
+          SOLUÇÃO: padrão de "facade" (carregamento sob demanda, o
+          mesmo truque usado por embeds de YouTube como o
+          lite-youtube-embed). Em vez do iframe ir direto no HTML,
+          mostramos um botão com a prévia do local; o iframe real do
+          Google Maps só é criado via JavaScript quando o usuário
+          clica. A funcionalidade pedida no desafio extra (mapa do
+          Google Maps na seção de Contato) continua existindo, mas o
+          Lighthouse audita o estado inicial da página - sem clique,
+          sem iframe, sem cookies de terceiros, sem APIs depreciadas.
+
+          MOTIVO: isso também é bom para performance/privacidade
+          "de verdade", não só para a nota: a maioria dos visitantes
+          nunca chega a clicar no mapa, então eles nem pagam o custo
+          (rede + cookies) de carregar o Google Maps.
+        -->
+        <div class="mapa-wrapper" id="mapa-wrapper">
+          <button type="button" class="mapa-facade" id="mapa-facade"
+                  aria-label="Carregar mapa do Google Maps com a localização da Mecânica Mantovani em Toledo/PR">
+            <span class="mapa-facade-icon" aria-hidden="true">📍</span>
+            <span class="mapa-facade-texto">Ver no Google Maps</span>
+            <span class="mapa-facade-sub">Toledo/PR — clique para carregar o mapa</span>
+          </button>
         </div>
       </div>
     </section>
 
   </main>
+
+  <script>
+    // Carrega o iframe do Google Maps somente quando o usuário clica
+    // (ver comentário ERRO/SOLUÇÃO/MOTIVO acima, na seção de Contato).
+    document.getElementById('mapa-facade').addEventListener('click', function () {
+      var wrapper = document.getElementById('mapa-wrapper');
+      var iframe = document.createElement('iframe');
+      iframe.src = 'https://www.google.com/maps?q=Toledo,PR&output=embed';
+      iframe.title = 'Localização da Mecânica Mantovani no Google Maps';
+      iframe.loading = 'lazy';
+      iframe.referrerPolicy = 'no-referrer-when-downgrade';
+      wrapper.innerHTML = '';
+      wrapper.appendChild(iframe);
+    });
+  </script>
 
   <footer>
     <p>&copy; 2026 Mecânica Mantovani - Toledo/PR. Todos os direitos reservados.</p>
